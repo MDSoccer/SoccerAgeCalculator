@@ -10,18 +10,23 @@
   <form class="psc-agecalc__form" id="pscAgeCalcForm" novalidate>
     <label class="psc-agecalc__label" for="pscDob">Player Date of Birth</label>
 
-    <div class="psc-agecalc__row">
+    <div class="psc-input-wrap">
+      <span class="psc-input-ghost">MM/DD/YYYY</span>
       <input
-        class="psc-agecalc__input"
+        class="psc-agecalc__input psc-masked-input"
         id="pscDob"
         name="pscDob"
         type="text"
         inputmode="numeric"
         autocomplete="bday"
-        placeholder="MM/DD/YYYY"
         aria-describedby="pscAgeCalcHelp pscAgeCalcError"
+        maxlength="10"
       />
-      <button class="psc-agecalc__btn" type="submit">Calculate</button>
+    </div>
+
+    <button class="psc-agecalc__btn" id="pscAgeCalcBtn" type="submit" disabled>
+      Calculate
+    </button>
     </div>
 
     <p class="psc-agecalc__help" id="pscAgeCalcHelp">
@@ -107,12 +112,13 @@
     text-align: left;
     white-space: nowrap;
   }
+  .psc-agecalc__btn[disabled]{ opacity:.55; cursor:not-allowed; }
+  .psc-agecalc__input.is-invalid{ border-color:#b00020; outline-color:#b00020; }
 </style>
 
 <script>
 (function(){
   // --- 2026–27 seasonal-year ranges (inclusive) ---
-  // Source ranges match the Coppermine chart (Aug 1 – Jul 31). (U19 spans two years there.)
   const RANGES = [
     { group: "U19", start: "2007-08-01", end: "2009-07-31" },
     { group: "U17", start: "2009-08-01", end: "2010-07-31" },
@@ -134,6 +140,7 @@
 
   const form = document.getElementById("pscAgeCalcForm");
   const dobInput = document.getElementById("pscDob");
+  const btn = document.getElementById("pscAgeCalcBtn");
   const errorEl = document.getElementById("pscAgeCalcError");
   const valueEl = document.getElementById("pscAgeCalcValue");
   const tableBody = document.getElementById("pscAgeCalcTableBody");
@@ -153,35 +160,103 @@
     }).join("");
   }
 
-  // Accepts:
-  // - MM/DD/YYYY (or M/D/YYYY)
-  // - YYYY-MM-DD
-  // - MM-DD-YYYY
-  function parseDOB(raw){
-    const v = String(raw || "").trim();
+  // ---------- UX helpers ----------
+  function setError(msg){
+    errorEl.textContent = msg || "";
+    dobInput.classList.toggle("is-invalid", !!msg);
+  }
+  function setResult(txt){
+    valueEl.textContent = txt || "—";
+  }
+  function setButtonEnabled(ok){
+    btn.disabled = !ok;
+  }
 
-    // YYYY-MM-DD
+  // ---------- Input masking ----------
+  // Goal: as user types digits, show MM/DD/YYYY with slashes inserted.
+  // Accepts: 81214, 081214, 8/12/14, 08/12/14, 2014-08-12, etc.
+  function digitsOnly(s){ return String(s || "").replace(/\D/g, ""); }
+
+  function maskToMDY(raw){
+    // Returns display string formatted as MM/DD/YYYY-ish (partial allowed)
+    const d = digitsOnly(raw).slice(0, 8); // MMDDYYYY max digits
+    let out = "";
+    if(d.length <= 2) out = d;
+    else if(d.length <= 4) out = d.slice(0,2) + "/" + d.slice(2);
+    else out = d.slice(0,2) + "/" + d.slice(2,4) + "/" + d.slice(4);
+    return out;
+  }
+
+  // ---------- Parsing / normalization ----------
+  // Returns { date: Date|null, normalized: "MM/DD/YYYY"|null, reason?: string }
+  function parseDOBSmart(raw){
+    const v = String(raw || "").trim();
+    if(!v) return { date:null, normalized:null };
+
+    // Accept ISO YYYY-MM-DD
     let m = v.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
     if(m){
       const y = +m[1], mo = +m[2], da = +m[3];
-      return safeDate(y, mo, da);
+      const d = safeDate(y, mo, da);
+      if(!d) return { date:null, normalized:null, reason:"Invalid date." };
+      return { date:d, normalized: `${pad2(mo)}/${pad2(da)}/${y}` };
     }
 
-    // MM/DD/YYYY or MM-DD-YYYY
-    m = v.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
-    if(m){
-      const mo = +m[1], da = +m[2], y = +m[3];
-      return safeDate(y, mo, da);
+    // Pull digits for MMDD(YY|YYYY)
+    const dig = digitsOnly(v);
+
+    // Handle 5-6 digits like MDDYY? Too ambiguous. We support 4,6,8 or slash forms.
+    // Slash forms are handled by digits logic too; we just interpret by length.
+    if(dig.length === 8){
+      const mo = +dig.slice(0,2);
+      const da = +dig.slice(2,4);
+      const y  = +dig.slice(4,8);
+      const d = safeDate(y, mo, da);
+      if(!d) return { date:null, normalized:null, reason:"Invalid date." };
+      return { date:d, normalized: `${pad2(mo)}/${pad2(da)}/${y}` };
     }
 
-    return null;
+    if(dig.length === 6){
+      // MMDDYY -> choose century. For youth soccer, 20YY is overwhelmingly likely.
+      const mo = +dig.slice(0,2);
+      const da = +dig.slice(2,4);
+      const yy = +dig.slice(4,6);
+
+      // Century heuristic:
+      // 00–30 => 2000–2030, else 1900–1999
+      const y = (yy <= 30) ? (2000 + yy) : (1900 + yy);
+
+      const d = safeDate(y, mo, da);
+      if(!d) return { date:null, normalized:null, reason:"Invalid date." };
+      return { date:d, normalized: `${pad2(mo)}/${pad2(da)}/${y}` };
+    }
+
+    // If user typed like 8/12/2014 (1-digit month/day), browser input will keep slashes.
+    // Digits would be 8122014 (7 digits) — we can support that:
+    if(dig.length === 7){
+      // Interpret as MDDYYYY or MM D YYYY? Prefer MDDYYYY when first digit is month (1-9)
+      // We'll parse as: M + DD + YYYY (1 + 2 + 4) => 7 digits
+      const mo = +dig.slice(0,1);
+      const da = +dig.slice(1,3);
+      const y  = +dig.slice(3,7);
+      const d = safeDate(y, mo, da);
+      if(!d) return { date:null, normalized:null, reason:"Invalid date." };
+      return { date:d, normalized: `${pad2(mo)}/${pad2(da)}/${y}` };
+    }
+
+    // 4 digits like MMDD is incomplete
+    if(dig.length < 6){
+      return { date:null, normalized:null, reason:"Enter full birth date (MM/DD/YYYY)." };
+    }
+
+    // Anything else: reject (avoids guessing)
+    return { date:null, normalized:null, reason:"Please enter as MM/DD/YYYY." };
   }
 
   function safeDate(year, month, day){
     if(month < 1 || month > 12) return null;
     if(day < 1 || day > 31) return null;
     const d = new Date(year, month-1, day);
-    // Validate round-trip (catches 2/31, etc.)
     if(d.getFullYear() !== year || d.getMonth() !== (month-1) || d.getDate() !== day) return null;
     return d;
   }
@@ -193,34 +268,73 @@
     return null;
   }
 
-  function setError(msg){
-    errorEl.textContent = msg || "";
+  // ---------- Live validation (before submit) ----------
+  function validateLive(showMessages){
+    const parsed = parseDOBSmart(dobInput.value);
+
+    // Incomplete/invalid
+    if(!parsed.date){
+      setButtonEnabled(false);
+      setResult("—");
+      if(showMessages && parsed.reason) setError(parsed.reason);
+      else setError("");
+      return { ok:false, parsed };
+    }
+
+    // If valid, normalize input to MM/DD/YYYY (nice for users)
+    if(parsed.normalized) dobInput.value = parsed.normalized;
+
+    // Range check
+    const group = calcGroup(parsed.date);
+    if(!group){
+      setButtonEnabled(false);
+      setResult("Out of range");
+      if(showMessages) setError("That birth date is outside the listed 2026–27 youth age groups.");
+      else setError("");
+      return { ok:false, parsed };
+    }
+
+    // Good
+    setError("");
+    setButtonEnabled(true);
+    return { ok:true, parsed, group };
   }
-  function setResult(txt){
-    valueEl.textContent = txt || "—";
-  }
+
+  // Masking: format as user types digits, but don’t fight when they paste ISO.
+  dobInput.addEventListener("input", function(){
+    const v = dobInput.value.trim();
+
+    // If they paste ISO, keep it and just validate
+    if(/^\d{4}-\d{1,2}-\d{1,2}$/.test(v)){
+      validateLive(false);
+      return;
+    }
+
+    // Otherwise, apply MM/DD/YYYY mask from digits
+    const masked = maskToMDY(v);
+    if(masked !== dobInput.value) dobInput.value = masked;
+
+    // Validate quietly while typing (no red error spam)
+    validateLive(false);
+  });
+
+  // On blur, show messages if still invalid
+  dobInput.addEventListener("blur", function(){
+    validateLive(true);
+  });
 
   form.addEventListener("submit", function(e){
     e.preventDefault();
-    setError("");
+    const res = validateLive(true);
+    if(!res.ok) return;
 
-    const dob = parseDOB(dobInput.value);
-    if(!dob){
-      setResult("—");
-      setError("Please enter a valid date (MM/DD/YYYY).");
-      return;
-    }
-
-    const group = calcGroup(dob);
-    if(!group){
-      setResult("Out of range");
-      setError("That birth date is outside the listed 2026–27 youth age groups.");
-      return;
-    }
-
+    // Now we can safely compute/display the group
+    const group = calcGroup(res.parsed.date);
     setResult(group);
   });
 
   buildTable();
+  // Initialize button state on load
+  validateLive(false);
 })();
 </script>
