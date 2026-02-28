@@ -1,274 +1,505 @@
-<!-- PSC Age Group Calculator (2026–2027 Season) -->
-<div class="psc-agecalc" role="region" aria-label="Soccer age group calculator">
-  <div class="psc-agecalc__header">
-    <h3 class="psc-agecalc__title">Age Group Calculator (2026–27)</h3>
-    <p class="psc-agecalc__subtitle">
-      Uses the seasonal-year cutoff <strong>Aug 1 – Jul 31</strong> for the 2026–27 season.
+<!-- MDSoccer Age Group Calculator (2026–2027 Season) -->
+<section class="mdsoccer-agecalc" role="region" aria-label="Soccer age group calculator">
+  <div class="mdsoccer-agecalc__bg" aria-hidden="true"></div>
+
+  <header class="mdsoccer-agecalc__header">
+    <div class="mdsoccer-agecalc__brand">
+      <div class="mdsoccer-agecalc__flag" aria-hidden="true">
+        <!-- Simple inline Maryland flag (stylized) -->
+        <svg viewBox="0 0 120 80" width="64" height="42" role="img" aria-label="Maryland flag">
+          <defs>
+            <pattern id="mdChecks" width="20" height="20" patternUnits="userSpaceOnUse">
+              <rect width="10" height="10"></rect>
+              <rect x="10" y="10" width="10" height="10"></rect>
+            </pattern>
+            <pattern id="mdBars" width="16" height="16" patternUnits="userSpaceOnUse" patternTransform="rotate(90)">
+              <rect width="16" height="8"></rect>
+            </pattern>
+          </defs>
+
+          <!-- Background -->
+          <rect width="120" height="80" fill="#ffffff"></rect>
+
+          <!-- Quadrants -->
+          <!-- Q1 (top-left): black/yellow checks -->
+          <rect x="0" y="0" width="60" height="40" fill="#f2c200"></rect>
+          <rect x="0" y="0" width="60" height="40" fill="#111111" opacity="0.85" mask="url(#m1)"></rect>
+
+          <!-- Use an explicit checker mask -->
+          <mask id="m1">
+            <rect width="60" height="40" fill="url(#mdChecks)"></rect>
+          </mask>
+
+          <!-- Q2 (top-right): red/white cross bottony-ish -->
+          <rect x="60" y="0" width="60" height="40" fill="#ffffff"></rect>
+          <path d="M60 0 L120 40 M120 0 L60 40" stroke="#b61b2a" stroke-width="10" opacity="0.95"></path>
+
+          <!-- Q3 (bottom-left): red/white cross (mirrored) -->
+          <rect x="0" y="40" width="60" height="40" fill="#ffffff"></rect>
+          <path d="M0 40 L60 80 M60 40 L0 80" stroke="#b61b2a" stroke-width="10" opacity="0.95"></path>
+
+          <!-- Q4 (bottom-right): black/yellow checks -->
+          <rect x="60" y="40" width="60" height="40" fill="#f2c200"></rect>
+          <rect x="60" y="40" width="60" height="40" fill="#111111" opacity="0.85" mask="url(#m2)"></rect>
+          <mask id="m2">
+            <rect x="60" y="40" width="60" height="40" fill="url(#mdChecks)"></rect>
+          </mask>
+
+          <!-- Border -->
+          <rect x="1" y="1" width="118" height="78" fill="none" stroke="rgba(0,0,0,.25)" stroke-width="2"></rect>
+        </svg>
+      </div>
+
+      <div>
+        <h3 class="mdsoccer-agecalc__title">MDSoccer Age Group Calculator (2026–27)</h3>
+        <p class="mdsoccer-agecalc__subtitle">
+          Uses the seasonal-year cutoff <strong>Aug 1 – Jul 31</strong> for the 2026–27 season.
+        </p>
+      </div>
+    </div>
+
+    <div class="mdsoccer-agecalc__link">
+      <a
+        class="mdsoccer-agecalc__msysa"
+        href="https://www.msysa.org/news/2025/12/12/special-topic-meeting-age-group-registration-cutoff-change/"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        MSYSA: Age group registration cutoff change (details)
+      </a>
+    </div>
+  </header>
+
+  <div class="mdsoccer-agecalc__card">
+    <form class="mdsoccer-agecalc__form" id="mdsoccerAgeCalcForm" novalidate>
+      <label class="mdsoccer-agecalc__label" for="mdsoccerDob">Player Date of Birth</label>
+
+      <div class="mdsoccer-agecalc__row">
+        <input
+          class="mdsoccer-agecalc__input"
+          id="mdsoccerDob"
+          name="mdsoccerDob"
+          type="text"
+          inputmode="text"
+          autocomplete="bday"
+          placeholder="MM/DD/YYYY"
+          aria-describedby="mdsoccerAgeCalcHelp mdsoccerAgeCalcError"
+        />
+
+        <button class="mdsoccer-agecalc__btn" type="submit">Calculate</button>
+      </div>
+
+      <p class="mdsoccer-agecalc__help" id="mdsoccerAgeCalcHelp">
+        Tip: Paste dates like <em>2016-09-14</em>, <em>9/14/2016</em>, or <em>09142016</em>.
+      </p>
+
+      <p class="mdsoccer-agecalc__error" id="mdsoccerAgeCalcError" aria-live="polite"></p>
+
+      <div class="mdsoccer-agecalc__result" id="mdsoccerAgeCalcResult" aria-live="polite">
+        <span class="mdsoccer-agecalc__result-label">Player’s Age Group:</span>
+        <span class="mdsoccer-agecalc__result-value" id="mdsoccerAgeCalcValue">—</span>
+      </div>
+    </form>
+
+    <details class="mdsoccer-agecalc__details">
+      <summary>Show 2026–27 age-group ranges</summary>
+      <div class="mdsoccer-agecalc__tablewrap" aria-label="Age group ranges table">
+        <table class="mdsoccer-agecalc__table">
+          <thead>
+            <tr>
+              <th>Age Group</th>
+              <th>Birth Date Range (Inclusive)</th>
+            </tr>
+          </thead>
+          <tbody id="mdsoccerAgeCalcTableBody"></tbody>
+        </table>
+      </div>
+    </details>
+
+    <p class="mdsoccer-agecalc__fineprint">
+      Note: This tool is a convenience calculator for the <strong>2026–27</strong> seasonal-year ranges shown below.
+      Always defer to official league guidance if anything conflicts.
     </p>
   </div>
-
-  <form class="psc-agecalc__form" id="pscAgeCalcForm" novalidate>
-    <label class="psc-agecalc__label" for="pscDob">Player Date of Birth</label>
-
-    <div class="psc-input-wrap" id="pscDobWrap">
-      <span class="psc-input-ghost" aria-hidden="true">MM/DD/YYYY</span>
-      <input
-        class="psc-agecalc__input"
-        id="pscDob"
-        name="pscDob"
-        type="text"
-        inputmode="text"
-        autocomplete="bday"
-        placeholder="MM/DD/YYYY"
-        aria-describedby="pscAgeCalcHelp pscAgeCalcError"
-      />
-      <button class="psc-agecalc__btn" type="submit">Calculate</button>
-    </div>
-
-    <p class="psc-agecalc__help" id="pscAgeCalcHelp">
-      Tip: You can also paste dates like <em>2016-09-14</em> or <em>9/14/2016</em>.
-    </p>
-
-    <p class="psc-agecalc__error" id="pscAgeCalcError" aria-live="polite"></p>
-
-    <div class="psc-agecalc__result" id="pscAgeCalcResult" aria-live="polite">
-      <span class="psc-agecalc__result-label">Player’s Age Group:</span>
-      <span class="psc-agecalc__result-value" id="pscAgeCalcValue">—</span>
-    </div>
-  </form>
-
-  <details class="psc-agecalc__details">
-    <summary>Show 2026–27 age-group ranges</summary>
-    <div class="psc-agecalc__tablewrap" aria-label="Age group ranges table">
-      <table class="psc-agecalc__table">
-        <thead>
-          <tr>
-            <th>Age Group</th>
-            <th>Birth Date Range (Inclusive)</th>
-          </tr>
-        </thead>
-        <tbody id="pscAgeCalcTableBody"></tbody>
-      </table>
-    </div>
-  </details>
-</div>
+</section>
 
 <style>
-  .psc-agecalc{
-    max-width: 780px;
-    margin: 18px auto;
+  /* ---------- MDSoccer Age Calc (self-contained) ---------- */
+  .mdsoccer-agecalc {
+    position: relative;
+    max-width: 860px;
+    margin: 22px auto;
     padding: 18px;
-    border: 1px solid rgba(0,0,0,.12);
-    border-radius: 12px;
-    background: rgba(255,255,255,.9);
+    border-radius: 16px;
+    overflow: hidden;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    color: rgba(15, 23, 42, 0.95);
   }
-  .psc-agecalc__title{ margin: 0 0 6px 0; }
-  .psc-agecalc__subtitle{ margin: 0 0 14px 0; opacity: .85; }
-  .psc-agecalc__label{ display:block; font-weight: 600; margin-bottom: 8px; }
-  .psc-agecalc__row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
-  .psc-agecalc__input{
-    flex: 1 1 220px;
-    padding: 12px 12px;
-    border: 1px solid rgba(0,0,0,.18);
+
+  .mdsoccer-agecalc__bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(1200px 400px at 10% 0%, rgba(182, 27, 42, 0.18), transparent 60%),
+      radial-gradient(900px 380px at 90% 10%, rgba(31, 41, 55, 0.18), transparent 55%),
+      linear-gradient(180deg, rgba(248, 250, 252, 0.95), rgba(241, 245, 249, 0.92));
+    border: 1px solid rgba(2, 6, 23, 0.10);
+    border-radius: 16px;
+  }
+
+  .mdsoccer-agecalc > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .mdsoccer-agecalc__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 8px 6px 14px 6px;
+  }
+
+  .mdsoccer-agecalc__brand {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    min-width: 0;
+  }
+
+  .mdsoccer-agecalc__flag {
+    flex: 0 0 auto;
+    width: 64px;
+    height: 42px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(2, 6, 23, 0.12);
+  }
+
+  .mdsoccer-agecalc__title {
+    margin: 0 0 4px 0;
+    font-size: 18px;
+    line-height: 1.25;
+    letter-spacing: 0.2px;
+  }
+
+  .mdsoccer-agecalc__subtitle {
+    margin: 0;
+    font-size: 13.5px;
+    line-height: 1.35;
+    color: rgba(15, 23, 42, 0.78);
+  }
+
+  .mdsoccer-agecalc__link {
+    flex: 0 0 auto;
+    padding-top: 4px;
+  }
+
+  .mdsoccer-agecalc__msysa {
+    display: inline-block;
+    font-size: 13px;
+    text-decoration: none;
+    color: rgba(182, 27, 42, 0.95);
+    padding: 8px 10px;
     border-radius: 10px;
-    font-size: 16px;
+    border: 1px solid rgba(182, 27, 42, 0.22);
+    background: rgba(255, 255, 255, 0.55);
+    transition: transform 120ms ease, background 120ms ease;
+    white-space: nowrap;
   }
-  .psc-agecalc__btn{
+  .mdsoccer-agecalc__msysa:hover {
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.8);
+  }
+
+  .mdsoccer-agecalc__card {
+    background: rgba(255, 255, 255, 0.82);
+    border: 1px solid rgba(2, 6, 23, 0.10);
+    border-radius: 14px;
+    box-shadow: 0 18px 50px rgba(2, 6, 23, 0.10);
+    padding: 16px;
+  }
+
+  .mdsoccer-agecalc__label {
+    display: block;
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 8px;
+    color: rgba(15, 23, 42, 0.92);
+  }
+
+  .mdsoccer-agecalc__row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .mdsoccer-agecalc__input {
+    flex: 1 1 240px;
+    padding: 12px 12px;
+    border: 1px solid rgba(2, 6, 23, 0.18);
+    border-radius: 12px;
+    font-size: 16px;
+    background: rgba(255, 255, 255, 0.95);
+    outline: none;
+    transition: box-shadow 120ms ease, border-color 120ms ease;
+  }
+  .mdsoccer-agecalc__input:focus {
+    border-color: rgba(182, 27, 42, 0.55);
+    box-shadow: 0 0 0 4px rgba(182, 27, 42, 0.14);
+  }
+  .mdsoccer-agecalc__input.is-invalid {
+    border-color: rgba(176, 0, 32, 0.85);
+    box-shadow: 0 0 0 4px rgba(176, 0, 32, 0.12);
+  }
+
+  .mdsoccer-agecalc__btn {
     flex: 0 0 auto;
     padding: 12px 14px;
-    border-radius: 10px;
-    border: 1px solid rgba(0,0,0,.18);
+    border-radius: 12px;
+    border: 1px solid rgba(2, 6, 23, 0.18);
     cursor: pointer;
-    font-weight: 700;
+    font-weight: 800;
+    font-size: 14px;
+    background: linear-gradient(180deg, rgba(182, 27, 42, 0.98), rgba(140, 18, 30, 0.98));
+    color: #ffffff;
+    transition: transform 120ms ease, filter 120ms ease;
   }
-  .psc-agecalc__help{ margin: 10px 0 0 0; font-size: 13px; opacity: .8; }
-  .psc-agecalc__error{ margin: 10px 0 0 0; font-size: 14px; color: #b00020; min-height: 1.2em; }
-  .psc-agecalc__result{
+  .mdsoccer-agecalc__btn:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.02);
+  }
+  .mdsoccer-agecalc__btn:active {
+    transform: translateY(0px);
+  }
+  .mdsoccer-agecalc__btn[disabled] {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  .mdsoccer-agecalc__help {
+    margin: 10px 0 0 0;
+    font-size: 13px;
+    color: rgba(15, 23, 42, 0.72);
+  }
+
+  .mdsoccer-agecalc__error {
+    margin: 10px 0 0 0;
+    font-size: 14px;
+    color: rgba(176, 0, 32, 0.95);
+    min-height: 1.2em;
+  }
+
+  .mdsoccer-agecalc__result {
     margin-top: 14px;
     padding: 12px;
-    border-radius: 10px;
-    background: rgba(0,0,0,.04);
-    display:flex;
-    gap:8px;
-    align-items:baseline;
-    flex-wrap:wrap;
+    border-radius: 12px;
+    background: rgba(2, 6, 23, 0.04);
+    border: 1px solid rgba(2, 6, 23, 0.08);
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+    flex-wrap: wrap;
   }
-  .psc-agecalc__result-label{ font-weight: 700; }
-  .psc-agecalc__result-value{ font-weight: 800; font-size: 18px; }
-  .psc-agecalc__details{ margin-top: 14px; }
-  .psc-agecalc__tablewrap{ overflow:auto; margin-top: 10px; }
-  .psc-agecalc__table{
+
+  .mdsoccer-agecalc__result-label {
+    font-weight: 800;
+  }
+  .mdsoccer-agecalc__result-value {
+    font-weight: 900;
+    font-size: 18px;
+    letter-spacing: 0.2px;
+  }
+
+  .mdsoccer-agecalc__details {
+    margin-top: 14px;
+  }
+  .mdsoccer-agecalc__details summary {
+    cursor: pointer;
+    font-weight: 700;
+    color: rgba(15, 23, 42, 0.88);
+  }
+
+  .mdsoccer-agecalc__tablewrap {
+    overflow: auto;
+    margin-top: 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(2, 6, 23, 0.10);
+    background: rgba(255, 255, 255, 0.78);
+  }
+
+  .mdsoccer-agecalc__table {
     width: 100%;
     border-collapse: collapse;
     font-size: 14px;
   }
-  .psc-agecalc__table th, .psc-agecalc__table td{
-    border-bottom: 1px solid rgba(0,0,0,.12);
-    padding: 10px 8px;
+  .mdsoccer-agecalc__table th,
+  .mdsoccer-agecalc__table td {
+    border-bottom: 1px solid rgba(2, 6, 23, 0.10);
+    padding: 10px 10px;
     text-align: left;
     white-space: nowrap;
   }
-  .psc-agecalc__btn[disabled]{ opacity:.55; cursor:not-allowed; }
-  .psc-agecalc__input.is-invalid{ border-color:#b00020; outline-color:#b00020; }
-  .psc-input-wrap{
-    position:relative;
-    width:100%;
-    max-width:400px;
+  .mdsoccer-agecalc__table thead th {
+    background: rgba(2, 6, 23, 0.04);
+    font-weight: 800;
+  }
+  .mdsoccer-agecalc__table tbody tr:hover td {
+    background: rgba(182, 27, 42, 0.05);
   }
 
-  .psc-masked-input{
-    position:relative;
-    background:transparent;
-    z-index:2;
+  .mdsoccer-agecalc__fineprint {
+    margin: 12px 0 0 0;
+    font-size: 12.5px;
+    color: rgba(15, 23, 42, 0.70);
   }
 
-  .psc-input-ghost{
-    position:absolute;
-    top:50%;
-    left:14px;
-    transform:translateY(-50%);
-    color:rgba(0,0,0,0.25);
-    pointer-events:none;
-    font-family:inherit;
-    font-size:16px;
-    letter-spacing:1px;
-    z-index:1;
-  }
-
-  /* When user starts typing, fade ghost */
-  .psc-masked-input:not(:placeholder-shown) + .psc-input-ghost,
-  .psc-masked-input:focus + .psc-input-ghost{
-    opacity:0;
+  @media (max-width: 640px) {
+    .mdsoccer-agecalc__header {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .mdsoccer-agecalc__msysa {
+      width: 100%;
+      text-align: center;
+      white-space: normal;
+    }
   }
 </style>
 
 <script>
-(function(){
-  // --- 2026–27 seasonal-year ranges (inclusive) ---
-  const RANGES = [
-    { group: "U19", start: "2007-08-01", end: "2009-07-31" },
-    { group: "U17", start: "2009-08-01", end: "2010-07-31" },
-    { group: "U16", start: "2010-08-01", end: "2011-07-31" },
-    { group: "U15", start: "2011-08-01", end: "2012-07-31" },
-    { group: "U14", start: "2012-08-01", end: "2013-07-31" },
-    { group: "U13", start: "2013-08-01", end: "2014-07-31" },
-    { group: "U12", start: "2014-08-01", end: "2015-07-31" },
-    { group: "U11", start: "2015-08-01", end: "2016-07-31" },
-    { group: "U10", start: "2016-08-01", end: "2017-07-31" },
-    { group: "U9",  start: "2017-08-01", end: "2018-07-31" },
-    { group: "U8",  start: "2018-08-01", end: "2019-07-31" },
-    { group: "U7",  start: "2019-08-01", end: "2020-07-31" }
-  ].map(r => ({
-    ...r,
-    startDate: new Date(r.start + "T00:00:00"),
-    endDate: new Date(r.end + "T23:59:59")
-  }));
+  (function () {
+    // --- 2026–27 seasonal-year ranges (inclusive) ---
+    const RANGES = [
+      { group: "U19", start: "2007-08-01", end: "2009-07-31" },
+      { group: "U17", start: "2009-08-01", end: "2010-07-31" },
+      { group: "U16", start: "2010-08-01", end: "2011-07-31" },
+      { group: "U15", start: "2011-08-01", end: "2012-07-31" },
+      { group: "U14", start: "2012-08-01", end: "2013-07-31" },
+      { group: "U13", start: "2013-08-01", end: "2014-07-31" },
+      { group: "U12", start: "2014-08-01", end: "2015-07-31" },
+      { group: "U11", start: "2015-08-01", end: "2016-07-31" },
+      { group: "U10", start: "2016-08-01", end: "2017-07-31" },
+      { group: "U9", start: "2017-08-01", end: "2018-07-31" },
+      { group: "U8", start: "2018-08-01", end: "2019-07-31" },
+      { group: "U7", start: "2019-08-01", end: "2020-07-31" }
+    ].map((r) => ({
+      ...r,
+      startDate: new Date(r.start + "T00:00:00"),
+      endDate: new Date(r.end + "T23:59:59")
+    }));
 
-  const form = document.getElementById("pscAgeCalcForm");
-  const dobInput = document.getElementById("pscDob");
-  const errorEl = document.getElementById("pscAgeCalcError");
-  const valueEl = document.getElementById("pscAgeCalcValue");
-  const tableBody = document.getElementById("pscAgeCalcTableBody");
+    const form = document.getElementById("mdsoccerAgeCalcForm");
+    const dobInput = document.getElementById("mdsoccerDob");
+    const errorEl = document.getElementById("mdsoccerAgeCalcError");
+    const valueEl = document.getElementById("mdsoccerAgeCalcValue");
+    const tableBody = document.getElementById("mdsoccerAgeCalcTableBody");
 
-  function pad2(n){ return String(n).padStart(2,"0"); }
-  function formatMDY(d){
-    return `${pad2(d.getMonth()+1)}/${pad2(d.getDate())}/${d.getFullYear()}`;
-  }
-
-  function buildTable(){
-    if(!tableBody) return;
-    tableBody.innerHTML = RANGES.map(r => {
-      const s = formatMDY(r.startDate);
-      const e = formatMDY(new Date(r.endDate.getFullYear(), r.endDate.getMonth(), r.endDate.getDate()));
-      return `<tr><td><strong>${r.group}</strong></td><td>${s} – ${e}</td></tr>`;
-    }).join("");
-  }
-
-  function setError(msg){
-    errorEl.textContent = msg || "";
-  }
-  function setResult(txt){
-    valueEl.textContent = txt || "—";
-  }
-
-  function safeDate(year, month, day){
-    if(month < 1 || month > 12) return null;
-    if(day < 1 || day > 31) return null;
-    const d = new Date(year, month-1, day);
-    if(d.getFullYear() !== year || d.getMonth() !== (month-1) || d.getDate() !== day) return null;
-    return d;
-  }
-
-  // Permissive parser:
-  // - Tries YYYY-MM-DD
-  // - Tries MM/DD/YYYY and M/D/YYYY (with / or -)
-  // - Tries digits-only: MMDDYYYY (8 digits)
-  // If it can't confidently parse, returns null.
-  function parseDOBPermissive(raw){
-    const v = String(raw || "").trim();
-    if(!v) return null;
-
-    // YYYY-MM-DD
-    let m = v.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
-    if(m){
-      const y = +m[1], mo = +m[2], da = +m[3];
-      return safeDate(y, mo, da);
+    function pad2(n) {
+      return String(n).padStart(2, "0");
+    }
+    function formatMDY(d) {
+      return `${pad2(d.getMonth() + 1)}/${pad2(d.getDate())}/${d.getFullYear()}`;
     }
 
-    // MM/DD/YYYY or M/D/YYYY or MM-DD-YYYY
-    m = v.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
-    if(m){
-      const mo = +m[1], da = +m[2], y = +m[3];
-      return safeDate(y, mo, da);
+    function buildTable() {
+      if (!tableBody) return;
+      tableBody.innerHTML = RANGES.map((r) => {
+        const s = formatMDY(r.startDate);
+        const e = formatMDY(new Date(r.endDate.getFullYear(), r.endDate.getMonth(), r.endDate.getDate()));
+        return `<tr><td><strong>${r.group}</strong></td><td>${s} – ${e}</td></tr>`;
+      }).join("");
     }
 
-    // digits-only: MMDDYYYY
-    const digits = v.replace(/\D/g, "");
-    if(digits.length === 8){
-      const mo = +digits.slice(0,2);
-      const da = +digits.slice(2,4);
-      const y  = +digits.slice(4,8);
-      return safeDate(y, mo, da);
+    function setError(msg) {
+      errorEl.textContent = msg || "";
+      if (msg) dobInput.classList.add("is-invalid");
+      else dobInput.classList.remove("is-invalid");
+    }
+    function setResult(txt) {
+      valueEl.textContent = txt || "—";
     }
 
-    // If you truly want "any input" accepted, you can add more heuristics here,
-    // but this keeps parsing predictable and avoids mis-reading ambiguous inputs.
-    return null;
-  }
-
-  function calcGroup(dob){
-    for(const r of RANGES){
-      if(dob >= r.startDate && dob <= r.endDate) return r.group;
-    }
-    return null;
-  }
-
-  // Clear errors as they type (no enforcement)
-  dobInput.addEventListener("input", function(){
-    setError("");
-  });
-
-  form.addEventListener("submit", function(e){
-    e.preventDefault();
-    setError("");
-
-    const dob = parseDOBPermissive(dobInput.value);
-    if(!dob){
-      setResult("—");
-      setError("That date wasn’t recognized. Please try again using MM/DD/YYYY (example: 08/12/2014).");
-      return;
+    function safeDate(year, month, day) {
+      if (month < 1 || month > 12) return null;
+      if (day < 1 || day > 31) return null;
+      const d = new Date(year, month - 1, day);
+      if (d.getFullYear() !== year || d.getMonth() !== month - 1 || d.getDate() !== day) return null;
+      return d;
     }
 
-    const group = calcGroup(dob);
-    if(!group){
-      setResult("Out of range");
-      setError("That birth date is outside the listed 2026–27 youth age groups.");
-      return;
+    // Permissive parser:
+    // - YYYY-MM-DD
+    // - MM/DD/YYYY or M/D/YYYY (with / or -)
+    // - digits-only: MMDDYYYY (8 digits)
+    function parseDOBPermissive(raw) {
+      const v = String(raw || "").trim();
+      if (!v) return null;
+
+      // YYYY-MM-DD
+      let m = v.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+      if (m) {
+        const y = +m[1],
+          mo = +m[2],
+          da = +m[3];
+        return safeDate(y, mo, da);
+      }
+
+      // MM/DD/YYYY or M/D/YYYY or MM-DD-YYYY
+      m = v.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+      if (m) {
+        const mo = +m[1],
+          da = +m[2],
+          y = +m[3];
+        return safeDate(y, mo, da);
+      }
+
+      // digits-only: MMDDYYYY
+      const digits = v.replace(/\D/g, "");
+      if (digits.length === 8) {
+        const mo = +digits.slice(0, 2);
+        const da = +digits.slice(2, 4);
+        const y = +digits.slice(4, 8);
+        return safeDate(y, mo, da);
+      }
+
+      return null;
     }
 
-    setResult(group);
-  });
+    function calcGroup(dob) {
+      for (const r of RANGES) {
+        if (dob >= r.startDate && dob <= r.endDate) return r.group;
+      }
+      return null;
+    }
 
-  buildTable();
-})();
+    // Clear errors as they type
+    dobInput.addEventListener("input", function () {
+      setError("");
+    });
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      setError("");
+
+      const dob = parseDOBPermissive(dobInput.value);
+      if (!dob) {
+        setResult("—");
+        setError("That date wasn’t recognized. Try MM/DD/YYYY (example: 08/12/2014).");
+        return;
+      }
+
+      const group = calcGroup(dob);
+      if (!group) {
+        setResult("Out of range");
+        setError("That birth date is outside the listed 2026–27 youth age groups.");
+        return;
+      }
+
+      setResult(group);
+    });
+
+    buildTable();
+  })();
 </script>
