@@ -344,7 +344,12 @@
   (function () {
     // --- 2026–27 seasonal-year ranges (inclusive) ---
     const RANGES = [
-      { group: "U19", start: "2007-08-01", end: "2009-07-31" },
+      { group: "U23", start: "2003-08-01", end: "2004-07-31" },
+      { group: "U22", start: "2004-08-01", end: "2005-07-31" },
+      { group: "U21", start: "2005-08-01", end: "2006-07-31" },
+      { group: "U20", start: "2006-08-01", end: "2007-07-31" },
+      { group: "U19", start: "2007-08-01", end: "2008-07-31" },
+      { group: "U18", start: "2008-08-01", end: "2009-07-31" },
       { group: "U17", start: "2009-08-01", end: "2010-07-31" },
       { group: "U16", start: "2010-08-01", end: "2011-07-31" },
       { group: "U15", start: "2011-08-01", end: "2012-07-31" },
@@ -353,9 +358,12 @@
       { group: "U12", start: "2014-08-01", end: "2015-07-31" },
       { group: "U11", start: "2015-08-01", end: "2016-07-31" },
       { group: "U10", start: "2016-08-01", end: "2017-07-31" },
-      { group: "U9", start: "2017-08-01", end: "2018-07-31" },
-      { group: "U8", start: "2018-08-01", end: "2019-07-31" },
-      { group: "U7", start: "2019-08-01", end: "2020-07-31" }
+      { group: "U9",  start: "2017-08-01", end: "2018-07-31" },
+      { group: "U8",  start: "2018-08-01", end: "2019-07-31" },
+      { group: "U7",  start: "2019-08-01", end: "2020-07-31" },
+      { group: "U6",  start: "2020-08-01", end: "2021-07-31" },
+      { group: "U5",  start: "2021-08-01", end: "2022-07-31" },
+      { group: "U4",  start: "2022-08-01", end: "2023-07-31" }
     ].map((r) => ({
       ...r,
       startDate: new Date(r.start + "T00:00:00"),
