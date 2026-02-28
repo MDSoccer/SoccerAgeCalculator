@@ -1,0 +1,226 @@
+<!-- PSC Age Group Calculator (2026–2027 Season) -->
+<div class="psc-agecalc" role="region" aria-label="Soccer age group calculator">
+  <div class="psc-agecalc__header">
+    <h3 class="psc-agecalc__title">Age Group Calculator (2026–27)</h3>
+    <p class="psc-agecalc__subtitle">
+      Uses the seasonal-year cutoff <strong>Aug 1 – Jul 31</strong> for the 2026–27 season.
+    </p>
+  </div>
+
+  <form class="psc-agecalc__form" id="pscAgeCalcForm" novalidate>
+    <label class="psc-agecalc__label" for="pscDob">Player Date of Birth</label>
+
+    <div class="psc-agecalc__row">
+      <input
+        class="psc-agecalc__input"
+        id="pscDob"
+        name="pscDob"
+        type="text"
+        inputmode="numeric"
+        autocomplete="bday"
+        placeholder="MM/DD/YYYY"
+        aria-describedby="pscAgeCalcHelp pscAgeCalcError"
+      />
+      <button class="psc-agecalc__btn" type="submit">Calculate</button>
+    </div>
+
+    <p class="psc-agecalc__help" id="pscAgeCalcHelp">
+      Tip: You can also paste dates like <em>2016-09-14</em> or <em>9/14/2016</em>.
+    </p>
+
+    <p class="psc-agecalc__error" id="pscAgeCalcError" aria-live="polite"></p>
+
+    <div class="psc-agecalc__result" id="pscAgeCalcResult" aria-live="polite">
+      <span class="psc-agecalc__result-label">Player’s Age Group:</span>
+      <span class="psc-agecalc__result-value" id="pscAgeCalcValue">—</span>
+    </div>
+  </form>
+
+  <details class="psc-agecalc__details">
+    <summary>Show 2026–27 age-group ranges</summary>
+    <div class="psc-agecalc__tablewrap" aria-label="Age group ranges table">
+      <table class="psc-agecalc__table">
+        <thead>
+          <tr>
+            <th>Age Group</th>
+            <th>Birth Date Range (Inclusive)</th>
+          </tr>
+        </thead>
+        <tbody id="pscAgeCalcTableBody"></tbody>
+      </table>
+    </div>
+  </details>
+</div>
+
+<style>
+  .psc-agecalc{
+    max-width: 780px;
+    margin: 18px auto;
+    padding: 18px;
+    border: 1px solid rgba(0,0,0,.12);
+    border-radius: 12px;
+    background: rgba(255,255,255,.9);
+  }
+  .psc-agecalc__title{ margin: 0 0 6px 0; }
+  .psc-agecalc__subtitle{ margin: 0 0 14px 0; opacity: .85; }
+  .psc-agecalc__label{ display:block; font-weight: 600; margin-bottom: 8px; }
+  .psc-agecalc__row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  .psc-agecalc__input{
+    flex: 1 1 220px;
+    padding: 12px 12px;
+    border: 1px solid rgba(0,0,0,.18);
+    border-radius: 10px;
+    font-size: 16px;
+  }
+  .psc-agecalc__btn{
+    flex: 0 0 auto;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(0,0,0,.18);
+    cursor: pointer;
+    font-weight: 700;
+  }
+  .psc-agecalc__help{ margin: 10px 0 0 0; font-size: 13px; opacity: .8; }
+  .psc-agecalc__error{ margin: 10px 0 0 0; font-size: 14px; color: #b00020; min-height: 1.2em; }
+  .psc-agecalc__result{
+    margin-top: 14px;
+    padding: 12px;
+    border-radius: 10px;
+    background: rgba(0,0,0,.04);
+    display:flex;
+    gap:8px;
+    align-items:baseline;
+    flex-wrap:wrap;
+  }
+  .psc-agecalc__result-label{ font-weight: 700; }
+  .psc-agecalc__result-value{ font-weight: 800; font-size: 18px; }
+  .psc-agecalc__details{ margin-top: 14px; }
+  .psc-agecalc__tablewrap{ overflow:auto; margin-top: 10px; }
+  .psc-agecalc__table{
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  .psc-agecalc__table th, .psc-agecalc__table td{
+    border-bottom: 1px solid rgba(0,0,0,.12);
+    padding: 10px 8px;
+    text-align: left;
+    white-space: nowrap;
+  }
+</style>
+
+<script>
+(function(){
+  // --- 2026–27 seasonal-year ranges (inclusive) ---
+  // Source ranges match the Coppermine chart (Aug 1 – Jul 31). (U19 spans two years there.)
+  const RANGES = [
+    { group: "U19", start: "2007-08-01", end: "2009-07-31" },
+    { group: "U17", start: "2009-08-01", end: "2010-07-31" },
+    { group: "U16", start: "2010-08-01", end: "2011-07-31" },
+    { group: "U15", start: "2011-08-01", end: "2012-07-31" },
+    { group: "U14", start: "2012-08-01", end: "2013-07-31" },
+    { group: "U13", start: "2013-08-01", end: "2014-07-31" },
+    { group: "U12", start: "2014-08-01", end: "2015-07-31" },
+    { group: "U11", start: "2015-08-01", end: "2016-07-31" },
+    { group: "U10", start: "2016-08-01", end: "2017-07-31" },
+    { group: "U9",  start: "2017-08-01", end: "2018-07-31" },
+    { group: "U8",  start: "2018-08-01", end: "2019-07-31" },
+    { group: "U7",  start: "2019-08-01", end: "2020-07-31" }
+  ].map(r => ({
+    ...r,
+    startDate: new Date(r.start + "T00:00:00"),
+    endDate: new Date(r.end + "T23:59:59")
+  }));
+
+  const form = document.getElementById("pscAgeCalcForm");
+  const dobInput = document.getElementById("pscDob");
+  const errorEl = document.getElementById("pscAgeCalcError");
+  const valueEl = document.getElementById("pscAgeCalcValue");
+  const tableBody = document.getElementById("pscAgeCalcTableBody");
+
+  function pad2(n){ return String(n).padStart(2,"0"); }
+
+  function formatMDY(d){
+    return `${pad2(d.getMonth()+1)}/${pad2(d.getDate())}/${d.getFullYear()}`;
+  }
+
+  function buildTable(){
+    if(!tableBody) return;
+    tableBody.innerHTML = RANGES.map(r => {
+      const s = formatMDY(r.startDate);
+      const e = formatMDY(new Date(r.endDate.getFullYear(), r.endDate.getMonth(), r.endDate.getDate()));
+      return `<tr><td><strong>${r.group}</strong></td><td>${s} – ${e}</td></tr>`;
+    }).join("");
+  }
+
+  // Accepts:
+  // - MM/DD/YYYY (or M/D/YYYY)
+  // - YYYY-MM-DD
+  // - MM-DD-YYYY
+  function parseDOB(raw){
+    const v = String(raw || "").trim();
+
+    // YYYY-MM-DD
+    let m = v.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+    if(m){
+      const y = +m[1], mo = +m[2], da = +m[3];
+      return safeDate(y, mo, da);
+    }
+
+    // MM/DD/YYYY or MM-DD-YYYY
+    m = v.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+    if(m){
+      const mo = +m[1], da = +m[2], y = +m[3];
+      return safeDate(y, mo, da);
+    }
+
+    return null;
+  }
+
+  function safeDate(year, month, day){
+    if(month < 1 || month > 12) return null;
+    if(day < 1 || day > 31) return null;
+    const d = new Date(year, month-1, day);
+    // Validate round-trip (catches 2/31, etc.)
+    if(d.getFullYear() !== year || d.getMonth() !== (month-1) || d.getDate() !== day) return null;
+    return d;
+  }
+
+  function calcGroup(dob){
+    for(const r of RANGES){
+      if(dob >= r.startDate && dob <= r.endDate) return r.group;
+    }
+    return null;
+  }
+
+  function setError(msg){
+    errorEl.textContent = msg || "";
+  }
+  function setResult(txt){
+    valueEl.textContent = txt || "—";
+  }
+
+  form.addEventListener("submit", function(e){
+    e.preventDefault();
+    setError("");
+
+    const dob = parseDOB(dobInput.value);
+    if(!dob){
+      setResult("—");
+      setError("Please enter a valid date (MM/DD/YYYY).");
+      return;
+    }
+
+    const group = calcGroup(dob);
+    if(!group){
+      setResult("Out of range");
+      setError("That birth date is outside the listed 2026–27 youth age groups.");
+      return;
+    }
+
+    setResult(group);
+  });
+
+  buildTable();
+})();
+</script>
